@@ -1,0 +1,105 @@
+/* reset */
+#relay-iframe,
+#relay-btn {
+  background: none;
+  border: none;
+  bottom: auto;
+  clear: none;
+  cursor: default;
+  display: block;
+  float: none;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: medium;
+  font-style: normal;
+  font-weight: normal;
+  height: auto;
+  left: auto;
+  letter-spacing: normal;
+  line-height: normal;
+  max-height: none;
+  max-width: none;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  overflow: visible;
+  padding: 0;
+  position: static;
+  right: auto;
+  text-align: left;
+  text-decoration: none;
+  text-indent: 0;
+  text-transform: none;
+  top: auto;
+  visibility: visible;
+  white-space: normal;
+  width: auto;
+  z-index: auto;
+}
+
+/* iframe */
+#relay-iframe {
+  width: calc(100vw - var(--scrollbar-width, 0px));
+  height: var(--inner-height, 100vh);
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  left: calc(100vw - var(--scrollbar-width, 0px));
+  transition: 0.3s ease-in-out;
+  will-change: transform;
+  z-index: 2147483005;
+}
+
+@media only screen and (min-width: 62rem) {
+  #relay-iframe {
+    width: calc(50vw - var(--scrollbar-width, 0px));
+  }
+}
+
+@media only screen and (min-width: 80rem) {
+  #relay-iframe {
+    width: calc(34vw - var(--scrollbar-width, 0px));
+  }
+}
+
+#relay-iframe.relay-open {
+  transform: translateX(calc(-100vw + var(--scrollbar-width, 0px)));
+}
+
+@media only screen and (min-width: 62rem) {
+  #relay-iframe.relay-open {
+    transform: translateX(calc(-50vw + var(--scrollbar-width, 0px)));
+  }
+}
+
+@media only screen and (min-width: 80rem) {
+  #relay-iframe.relay-open {
+    transform: translateX(calc(-34vw + var(--scrollbar-width, 0px)));
+  }
+}
+
+/* button */
+#relay-btn {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  border-radius: 50%;
+  background: #171923;
+  z-index: 2147483004;
+  bottom: 20px;
+  right: 20px;
+}
+
+#relay-btn img {
+  height: 36px;
+}
+
+@media only screen and (min-width: 62rem) {
+  #relay-btn {
+    width: 60px;
+    height: 60px;
+  }
+}

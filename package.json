@@ -1,0 +1,29 @@
+{
+  "name": "relay-script",
+  "version": "1.0.0",
+  "module": "dist/relay-script.esm.js",
+  "browser": "dist/relay-script.umd.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-image": "^2.0.6",
+    "rollup": "^1.0.0",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-styles": "^3.11.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript": "^1.0.0",
+    "ts-node": "^7.0.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.2.2"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "ts-node test/test.ts",
+    "pretest": "npm run build"
+  },
+  "files": [
+    "dist"
+  ]
+}
