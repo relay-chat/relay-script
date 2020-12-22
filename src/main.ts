@@ -1,6 +1,7 @@
-import { getButtonColor } from "./domainData";
+import { getButtonColor } from "./util/domainData";
 import "./main.css";
 import logo from "./logo.svg";
+import isHexColor from "./util/validation";
 
 interface RelayWindow extends Window {
   relay?: RelayScript;
@@ -18,6 +19,7 @@ class RelayScript {
   static containerId = "relay-container";
   static openClass = "relay-open";
   static currentScript = document?.currentScript;
+  static searchParams = RelayScript.getSearchParams();
   static relayQueryKeys = [
     "relay_open",
     "message_id",
@@ -42,6 +44,7 @@ class RelayScript {
     this.container = RelayScript.createIframe();
     this.button = this.createButton();
     this.setButtonBackgroundDynamically();
+    this.setPosition();
     this.attachContainer();
   }
 
@@ -89,7 +92,7 @@ class RelayScript {
     }
   }
 
-  private static getHardcodedLocation() {
+  private static getSearchParams() {
     const src = (RelayScript.currentScript as HTMLScriptElement)?.src;
     if (!src) {
       return null;
@@ -100,8 +103,16 @@ class RelayScript {
       return null;
     }
 
-    const search = new URLSearchParams(rawSearch);
-    const hardcodedLocation = `${window.location.origin}${search.get("path")}`;
+    return new URLSearchParams(rawSearch);
+  }
+
+  private static getHardcodedLocation() {
+    const searchPath = RelayScript.searchParams?.get("path");
+    if (!searchPath) {
+      return null;
+    }
+
+    const hardcodedLocation = `${window.location.origin}${searchPath}`;
     try {
       new URL(hardcodedLocation);
       return hardcodedLocation;
@@ -128,15 +139,37 @@ class RelayScript {
     button.appendChild(buttonImg);
     button.id = RelayScript.buttonId;
     button.addEventListener("click", this.onButtonClick.bind(this));
+
+    const buttonBottom = RelayScript.searchParams?.get("button_bottom");
+    if (buttonBottom) {
+      button.style.bottom = buttonBottom;
+    }
+
     return button;
   }
 
+  private setPosition() {
+    const position = RelayScript.searchParams?.get("position");
+    if (position === "left") {
+      this.button.classList.add("left");
+      this.container.classList.add("left");
+    }
+  }
+
   private setButtonBackgroundDynamically() {
-    getButtonColor().then((color: string | null) => {
-      if (color) {
-        this.button.style.background = color;
-      }
-    });
+    const searchButtonColor = RelayScript.searchParams?.get("button_color");
+
+    // don't require the # because otherwise it would need to be
+    // URL encoded as %23
+    if (isHexColor(`#${searchButtonColor}`)) {
+      this.button.style.background = `#${searchButtonColor}`;
+    } else {
+      getButtonColor().then((color: string | null) => {
+        if (color) {
+          this.button.style.background = color;
+        }
+      });
+    }
   }
 
   private onButtonClick() {
@@ -146,9 +179,13 @@ class RelayScript {
   private handleMinimized(minimized: boolean) {
     this.minimized = minimized;
     this.postMessage({ action: "relayMinimized", data: minimized });
-    const className = minimized ? "" : RelayScript.openClass;
-    this.container.className = className;
-    this.button.className = className;
+    if (!minimized) {
+      this.container.classList.add(RelayScript.openClass);
+      this.button.classList.add(RelayScript.openClass);
+    } else {
+      this.container.classList.remove(RelayScript.openClass);
+      this.button.classList.remove(RelayScript.openClass);
+    }
   }
 
   private postMessage(message: object) {
