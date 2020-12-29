@@ -22,6 +22,13 @@ typeof window.relay; // => "object"
 // check if Relay has been initialized
 relay.initialized; // => true
 
+// listen for the Relay initialization event
+if (!relay.initialized) {
+   window.addEventListener("relayInitialized", () =>
+    alert("Relay has been initialized");
+  );
+}
+
 // minimize Relay programmatically
 if (relay.minimized) {
   relay.minimize();
@@ -37,6 +44,20 @@ relay.button; // => button#relay-btn
 relay.container; // => iframe#relay-iframe
 ```
 
+## Setting a Username
+
+Relay allows you to propose a username for every user on your site, so you can integrate with your existing authentication. Assuming that the username hasn't been taken and is valid (e.g., isn't 99 characters long), the user can sign up and start chatting with one click. To propose a username, use the `relay.setUsername` method. To propose a username, use the `relay.setUsername` method:
+
+```javascript
+if (window.relay && window.relay.initialized) {
+  window.relay.setUsername("myCoolUser");
+} else {
+  window.addEventListener("relayInitialized", () =>
+    window.relay.setUsername("myCoolUser")
+  );
+}
+```
+
 ## Overriding the Chat Channel's Location
 
 By default, Relay creates a chatroom specific to each pathname (e.g., relaychat.app, relaychat.app/docs). In order to override the location of the chatroom, you can add a `path` query string value to the script tag. **This path must be a valid pathname. In other words, your domain + the value of path must be a valid URL.**
@@ -47,6 +68,25 @@ By default, Relay creates a chatroom specific to each pathname (e.g., relaychat.
 
 <!-- for every page with this script tag, the chatroom will be relaychat.app/isnt-this-chat-awesome -->
 <script src="https://chat.relaychat.app?path=/isnt-this-chat-awesome"></script>
+```
+
+## Other Configuration Options (Color and Position)
+
+By adding query string parameters to the script tag, you can change the color of the button as well as its position:
+
+- `button_color`: this value must be hexcode **without the #**;
+- `position`: this value must be `left` or `right` (the default);
+- `button_bottom`: this value must be a valid value for the CSS bottom property, e.g., `20px` or `10vh`.
+
+```html
+<!-- the button will be white -->
+<script src="https://chat.relaychat.app?button_color=ffffff"></script>
+
+<!-- the button and chat will be on the left-->
+<script src="https://chat.relaychat.app?position=left"></script>
+
+<!-- the button will be 50px up from the bottom and on the left-->
+<script src="https://chat.relaychat.app?position=left&button_bottom=50px"></script>
 ```
 
 ## Admin
