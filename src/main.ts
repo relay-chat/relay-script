@@ -57,6 +57,20 @@ class RelayScript {
     this.handleMinimized(false);
   }
 
+  setUsername(username: string) {
+    if (typeof username !== "string") {
+      return console.error(
+        "tried to set a Relay username that was not a string"
+      );
+    } else if (!this.initialized) {
+      return console.error(
+        "tried to set a Relay username before Relay was initialized"
+      );
+    }
+
+    this.postMessage({ action: "setRelayUsername", data: { username } });
+  }
+
   private static addScrollbarWidthCssVariable() {
     document?.documentElement?.style?.setProperty(
       "--scrollbar-width",
@@ -200,6 +214,9 @@ class RelayScript {
     this.attachButton();
     this.sendWindowLocation();
     this.unminimizeIfRelayOpenQueryParam();
+
+    const initializationEvent = new Event("relayInitialized");
+    window?.dispatchEvent(initializationEvent);
   }
 
   private sendWindowLocation() {
