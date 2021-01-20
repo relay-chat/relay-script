@@ -1,4 +1,4 @@
-import { getButtonColor } from "./util/domainData";
+import { Domain, getDomain } from "./util/domainData";
 import "./main.css";
 import logo from "./logo.svg";
 import isHexColor from "./util/validation";
@@ -11,6 +11,7 @@ class RelayScript {
   button: HTMLButtonElement;
   minimized: boolean;
   initialized: boolean;
+  domain: null | Domain;
 
   static windowLocation = window?.location?.href;
   static iframeLocation = "https://app.relaychat.app";
@@ -35,6 +36,7 @@ class RelayScript {
   constructor() {
     this.minimized = true;
     this.initialized = false;
+    this.domain = null;
 
     this.addLoadScrollbarWidthListener();
     this.addInnerHeightListener();
@@ -43,7 +45,7 @@ class RelayScript {
 
     this.container = RelayScript.createIframe();
     this.button = this.createButton();
-    this.setButtonBackgroundDynamically();
+    this.setDomain();
     this.setPosition();
     this.attachContainer();
   }
@@ -113,10 +115,6 @@ class RelayScript {
     }
 
     const rawSearch = new URL(src).search;
-    if (!rawSearch.includes("path")) {
-      return null;
-    }
-
     return new URLSearchParams(rawSearch);
   }
 
@@ -138,12 +136,34 @@ class RelayScript {
     }
   }
 
+  private setDomain() {
+    getDomain().then((domain) => {
+      if (domain) {
+        this.domain = domain;
+      }
+      this.setButtonBackgroundDynamically();
+      this.validateAgainstWhiteList();
+    });
+  }
+
   private attachContainer() {
     document?.body?.appendChild(this.container);
   }
 
   private attachButton() {
     document?.body?.appendChild(this.button);
+  }
+
+  private detachContainer() {
+    if (document?.body?.contains(this.container)) {
+      document?.body?.removeChild(this.container);
+    }
+  }
+
+  private detachButton() {
+    if (document?.body?.contains(this.button)) {
+      document?.body?.removeChild(this.button);
+    }
   }
 
   private createButton() {
@@ -177,12 +197,32 @@ class RelayScript {
     // URL encoded as %23
     if (isHexColor(`#${searchButtonColor}`)) {
       this.button.style.background = `#${searchButtonColor}`;
-    } else {
-      getButtonColor().then((color: string | null) => {
-        if (color) {
-          this.button.style.background = color;
-        }
-      });
+    } else if (this.domain?.button_color) {
+      this.button.style.background = this.domain.button_color;
+    }
+  }
+
+  private validateAgainstWhiteList() {
+    const whitelist = this.domain?.path_whitelist;
+    if (!whitelist) {
+      return;
+    }
+
+    const pathname = window?.location?.pathname || "";
+
+    const isValidPath = whitelist.some((w) => {
+      try {
+        const pathMatches = w === pathname;
+        const regexMatches = w !== "/" && new RegExp(w).test(pathname);
+        return pathMatches || regexMatches;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    });
+
+    if (!isValidPath) {
+      this.removeRelay();
     }
   }
 
@@ -217,6 +257,17 @@ class RelayScript {
 
     const initializationEvent = new Event("relayInitialized");
     window?.dispatchEvent(initializationEvent);
+  }
+
+  private removeRelay() {
+    this.initialized = false;
+    this.detachButton();
+    this.detachContainer();
+  }
+
+  private handlePathChange() {
+    this.validateAgainstWhiteList();
+    this.sendWindowLocation();
   }
 
   private sendWindowLocation() {
@@ -267,14 +318,14 @@ class RelayScript {
   }
 
   private addPopstateListener() {
-    const boundSendWindowLocation = this.sendWindowLocation.bind(this);
-    window?.addEventListener("popstate", boundSendWindowLocation);
+    const boundHandlePathChange = this.handlePathChange.bind(this);
+    window?.addEventListener("popstate", boundHandlePathChange);
     window?.addEventListener("beforeunload", (_event) => {
-      window?.removeEventListener("popstate", boundSendWindowLocation);
+      window?.removeEventListener("popstate", boundHandlePathChange);
     });
 
-    RelayScript.monkeyPatchHistory("pushState", boundSendWindowLocation);
-    RelayScript.monkeyPatchHistory("replaceState", boundSendWindowLocation);
+    RelayScript.monkeyPatchHistory("pushState", boundHandlePathChange);
+    RelayScript.monkeyPatchHistory("replaceState", boundHandlePathChange);
   }
 
   private addLoadScrollbarWidthListener() {

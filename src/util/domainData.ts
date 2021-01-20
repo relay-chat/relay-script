@@ -1,8 +1,13 @@
 const API_DOMAIN = "https://api-www.relaychat.app";
 
-export const getButtonColor = async () => {
-  const domain = window?.location?.hostname;
+export interface Domain {
+  domain: string;
+  button_color?: string;
+  path_whitelist?: string[];
+}
 
+export const getDomain = async (): Promise<null | Domain> => {
+  const domain = window?.location?.hostname;
   if (!domain) {
     return null;
   }
@@ -11,11 +16,13 @@ export const getButtonColor = async () => {
     const resp = await (
       await fetch(`${API_DOMAIN}/api/v1/domains/domain?domain=${domain}`)
     ).json();
-    if (resp?.ok && resp?.domain?.button_color) {
-      return resp.domain.button_color;
+
+    if (resp?.ok && resp?.domain) {
+      return resp.domain as Domain;
     }
-    return null;
   } catch (e) {
     console.error(e);
   }
+
+  return null;
 };
