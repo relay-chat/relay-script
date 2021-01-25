@@ -73,6 +73,13 @@ class RelayScript {
     this.postMessage({ action: "setRelayUsername", data: { username } });
   }
 
+  sendWindowLocation() {
+    this.postMessage({
+      action: "windowLocation",
+      data: RelayScript.getHardcodedLocation() || window?.location?.href,
+    });
+  }
+
   private static addScrollbarWidthCssVariable() {
     document?.documentElement?.style?.setProperty(
       "--scrollbar-width",
@@ -268,13 +275,6 @@ class RelayScript {
   private handlePathChange() {
     this.validateAgainstWhiteList();
     this.sendWindowLocation();
-  }
-
-  private sendWindowLocation() {
-    this.postMessage({
-      action: "windowLocation",
-      data: RelayScript.getHardcodedLocation() || window?.location?.href,
-    });
   }
 
   private unminimizeIfRelayOpenQueryParam() {
