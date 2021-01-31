@@ -12,6 +12,7 @@ class RelayScript {
   minimized: boolean;
   initialized: boolean;
   domain: null | Domain;
+  hasManuallyOverridenLocation: boolean;
 
   static windowLocation = window?.location?.href;
   static iframeLocation = "https://app.relaychat.app";
@@ -37,6 +38,7 @@ class RelayScript {
     this.minimized = true;
     this.initialized = false;
     this.domain = null;
+    this.hasManuallyOverridenLocation = false;
 
     this.addLoadScrollbarWidthListener();
     this.addInnerHeightListener();
@@ -74,13 +76,16 @@ class RelayScript {
   }
 
   sendWindowLocation(manualLocation?: string) {
-    this.postMessage({
-      action: "windowLocation",
-      data:
-        manualLocation ||
-        RelayScript.getHardcodedLocation() ||
-        window?.location?.href,
-    });
+    if (!this.hasManuallyOverridenLocation) {
+      this.postMessage({
+        action: "windowLocation",
+        data:
+          manualLocation ||
+          RelayScript.getHardcodedLocation() ||
+          window?.location?.href,
+      });
+    }
+    this.hasManuallyOverridenLocation = !!manualLocation;
   }
 
   removeRelay() {
