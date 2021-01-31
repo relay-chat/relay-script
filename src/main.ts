@@ -80,6 +80,12 @@ class RelayScript {
     });
   }
 
+  removeRelay() {
+    this.initialized = false;
+    this.detachButton();
+    this.detachContainer();
+  }
+
   private static addScrollbarWidthCssVariable() {
     document?.documentElement?.style?.setProperty(
       "--scrollbar-width",
@@ -264,12 +270,6 @@ class RelayScript {
 
     const initializationEvent = new Event("relayInitialized");
     window?.dispatchEvent(initializationEvent);
-  }
-
-  private removeRelay() {
-    this.initialized = false;
-    this.detachButton();
-    this.detachContainer();
   }
 
   private handlePathChange() {
