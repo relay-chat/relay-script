@@ -73,10 +73,13 @@ class RelayScript {
     this.postMessage({ action: "setRelayUsername", data: { username } });
   }
 
-  sendWindowLocation() {
+  sendWindowLocation(manualLocation?: string) {
     this.postMessage({
       action: "windowLocation",
-      data: RelayScript.getHardcodedLocation() || window?.location?.href,
+      data:
+        manualLocation ||
+        RelayScript.getHardcodedLocation() ||
+        window?.location?.href,
     });
   }
 
